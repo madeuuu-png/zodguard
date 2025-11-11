@@ -4,7 +4,7 @@ import { loginSchema } from '../lib/schemans/TextShema';
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string[]; password?: string[] }>({});
 
   const handleChange = (name: string, value: string) => {
     setFormData(prev => ({
@@ -17,13 +17,18 @@ const LoginForm = () => {
     const result = loginSchema.safeParse(formData);
 
     if (!result.success) {
-      const fieldErrors: { email?: string; password?: string } = {};
+      const fieldErrors: { email?: string[]; password?: string[] } = {};
+      
       result.error.issues.forEach(issue => {
         const field = issue.path[0];
         if (field === 'email' || field === 'password') {
-          fieldErrors[field] = issue.message;
+          if (!fieldErrors[field]) {
+            fieldErrors[field] = [];
+          }
+          fieldErrors[field]!.push(issue.message);
         }
       });
+      
       setErrors(fieldErrors);
     } else {
       setErrors({});
@@ -66,11 +71,15 @@ const LoginForm = () => {
               placeholder="usuario@gmail.com"
               placeholderTextColor="#c4b5fd"
             />
-            {errors.email && (
-              <View className="bg-pink-50 rounded-xl px-3 py-2 mt-2">
-                <Text className="text-pink-600 text-sm font-medium">
-                  ⚠️ {errors.email}
-                </Text>
+            {errors.email && errors.email.length > 0 && (
+              <View className="mt-2 space-y-2">
+                {errors.email.map((error, index) => (
+                  <View key={index} className="bg-pink-50 rounded-xl px-3 py-2">
+                    <Text className="text-pink-600 text-sm font-medium">
+                      ⚠️ {error}
+                    </Text>
+                  </View>
+                ))}
               </View>
             )}
           </View>
@@ -90,11 +99,15 @@ const LoginForm = () => {
               placeholder="••••••••"
               placeholderTextColor="#c4b5fd"
             />
-            {errors.password && (
-              <View className="bg-pink-50 rounded-xl px-3 py-2 mt-2">
-                <Text className="text-pink-600 text-sm font-medium">
-                  ⚠️ {errors.password}
-                </Text>
+            {errors.password && errors.password.length > 0 && (
+              <View className="mt-2 space-y-2">
+                {errors.password.map((error, index) => (
+                  <View key={index} className="bg-pink-50 rounded-xl px-3 py-2 mb-2">
+                    <Text className="text-pink-600 text-sm font-medium">
+                      ⚠️ {error}
+                    </Text>
+                  </View>
+                ))}
               </View>
             )}
           </View>
